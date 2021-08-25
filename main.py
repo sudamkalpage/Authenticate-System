@@ -7,17 +7,28 @@ import tkinter.simpledialog as tsd
 import cv2,os
 import csv
 import numpy as np
-from PIL import Image
+from PIL import Image,ImageTk
 import pandas as pd
 import datetime
 import time
 import webbrowser
+import mysql.connector
 
-#######################################  Colours ################################################################################################################ 
+#######################################  Global Variables ###############################################
       
+photoLocation ="S:/Projects/face recognition/Authenticate-System/bg.png"
 black= "#787567"
 blue= "#040a5c"
 purple = "#6839ad"
+
+
+#######################################  Database Conection  ##############################################
+
+# mydb = mysql.connector.connect(host="localhost",user="root",passwd="")
+# mycursor = mydb.cursor()
+# mycursor.execute("show databases")
+# for i in mycursor:
+#     print(i)
 
 ############################################# FUNCTIONS ################################################
 
@@ -119,6 +130,7 @@ def psw():
             return
     password = tsd.askstring('Password', 'Enter Password', show='*')
     if (password == key):
+        ################################## enter sql command here ####################################################
         TrainImages()
     elif (password == None):
         pass
@@ -146,6 +158,15 @@ def clear5():
 
 def clear6():
     txt6.delete(0, 'end')
+
+def clear7():
+    txt7.delete(0, 'end')
+
+def clear8():
+    txt8.delete(0, 'end')
+
+def clear9():
+    txt9.delete(0, 'end')
 
 #######################################################################################
 
@@ -233,6 +254,13 @@ def TrainImages():
     message.configure(text='Total Registrations till now  : ' + str(ID[0]))
     popup = lambda : tk.messagebox.showinfo(title="Info", message="Sign Up was Successfull !")
     popup()
+    clear()
+    clear2()
+    clear3()
+    clear6()
+    clear7()
+    clear8()
+    clear9()
 
 ############################################################################################3
 
@@ -348,14 +376,79 @@ def TrackImages():
     csvFile1.close()
     cam.release()
     cv2.destroyAllWindows()
- 
+
+ #################################################################################################
+
+def ValidatPhone(phone):
+    if phone.isdigit():
+        return True
+    elif phone == "":
+        return True
+    else:
+        tk.messagebox.showinfo(title="Invalid Input", message='Only Digits are aollwed for the Mobile Number!')
+        return False
+
+ #################################################################################################
+
+# def ValidateEmalil(email):
+#     if (email[len(email)-4:]==".com") :
+#         return True
+#     elif phone == "":
+#         return True
+#     else:
+#         tk.messagebox.showinfo(title="Invalid Input", message='Only Digits are aollwed for the Mobile Number!')
+#         return False
+
+ #################################################################################################
+
+def ValidatBeforeLogin():
+    if txt4.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter Email to proceed!')
+    elif txt5.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter Password to proceed!')
+    else:
+        return True
+    return False
+
+ #################################################################################################
+
+def ValidatBeforeSignup():
+    if txt.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter ID Number to proceed!')
+    elif txt2.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter First Name to proceed!')
+    elif txt3.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter Email to proceed!')
+    elif txt6.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter Password to proceed!')
+    elif txt7.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter Last Name to proceed!')
+    elif txt8.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Enter Mobile NUmber to proceed!')
+    elif txt9.get() == "":
+        tk.messagebox.showinfo(title="Insufficient Data", message='Please Confirm password to proceed!')
+    else:
+        return True
+    return False
+    
 #################################################################################################
 
 def logIn():
-    email=txt4.get()
-    password= txt5.get()
-    print(email,password)
-    webbrowser.open_new('https://google.com')
+    if ValidatBeforeLogin():
+        email=txt4.get()
+        password= txt5.get()
+        print(email,password)
+        query=f"SELECT user_id FROM user_info WHERE email = {email} and password = {password}"
+        mycursor.execute(query)        
+        webbrowser.open_new('https://google.com')
+        clear4()
+        clear5()
+
+#################################################################################################
+
+def SignUp():
+    if ValidatBeforeSignup():
+        psw()
 
 ######################################## USED STUFFS ############################################
     
@@ -383,67 +476,94 @@ mont={'01':'January',
 ######################################## GUI FRONT-END ##########################################################################################################
 
 window = tk.Tk()
-window.geometry("1000x600")
+window.geometry("1600x800")
 window.resizable(True,False)
 window.title("Online Food Ordering System")
 window.configure(background='#A239EA')
 
-# Add background image 
-bg = tk.PhotoImage(file = "S:/Projects/face recognition/Face_recognition_based_attendance_system/bg.png")
-canvas1 = tk.Canvas( window, width = 1120,height = 720)
-canvas1.pack(fill = "both", expand = True)
-canvas1.create_image( 0, 0, image = bg, anchor = "nw")
+# Read the Image
+image = Image.open(photoLocation)
+ 
+# Reszie the image using resize() method
+resize_image = image.resize((1600, 800))
+img = ImageTk.PhotoImage(resize_image)
+ 
+# create label and add resize image
+label1 = tk.Label(image=img)
+label1.image = img
+label1.pack()
 
 # Create Frames
-frame1 = tk.Frame(canvas1, bg=black)
-frame1.place(relx=0.05, rely=0.07, relwidth=0.39, relheight=0.80)
+frame1 = tk.Frame(window, bg=black)
+frame1.place(relx=0.07, rely=0.17, relwidth=0.26, relheight=0.70)
 
-frame2 = tk.Frame(canvas1   , bg=black)
-frame2.place(relx=0.55, rely=0.07, relwidth=0.38, relheight=0.80)
+frame2 = tk.Frame(window   , bg=black)
+frame2.place(relx=0.43, rely=0.17, relwidth=0.50, relheight=0.70)
 
 
 # Create Frames
-head2 = tk.Label(frame2, text="            SignUp            ", fg="white",bg=blue ,font=('times', 25, ' bold ') )
-head2.place(x=20, y=0 )
+head2 = tk.Label(frame2, text="                         SignUp                          ", fg="white",bg=blue ,font=('times', 25, ' bold ') )
+head2.place(x=100, y=0 )
 
 head1 = tk.Label(frame1, text="            Login          ", fg="white",bg=blue ,font=('times', 25, ' bold ') )
 head1.place(x=40,y=0)
 
 lb4 = tk.Label(frame1, text="Email",width=20  ,height=1  ,fg="black"  ,bg=black ,font=('times', 17, ' bold ') )
-lb4.place(x=40, y=140)  
+lb4.place(x=-80, y=140)  
 
 txt4 = tk.Entry(frame1,width=30 ,fg="black",font=('times', 15, ' bold '))
 txt4.place(x=30, y=173)
 
 lbl5 = tk.Label(frame1, text="Password",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
-lbl5.place(x=40, y=225)
+lbl5.place(x=-65, y=225)
 
 txt5 = tk.Entry(frame1,width=30 ,show="*",fg="black",font=('times', 15, ' bold ')  )
 txt5.place(x=30, y=258)
 
 lbl = tk.Label(frame2, text="Id Number",width=20  ,height=1  ,fg="black"  ,bg=black ,font=('times', 17, ' bold ') )
-lbl.place(x=40, y=140)
+lbl.place(x=-60, y=55)
 
 txt = tk.Entry(frame2,width=30 ,fg="black",font=('times', 15, ' bold '))
-txt.place(x=30, y=173)
+txt.place(x=30, y=88)
 
-lbl2 = tk.Label(frame2, text="Your Name",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
-lbl2.place(x=40, y=55)
+lbl2 = tk.Label(frame2, text="First Name",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
+lbl2.place(x=-60, y=140)
 
 txt2 = tk.Entry(frame2,width=30 ,fg="black",font=('times', 15, ' bold ')  )
-txt2.place(x=30, y=88)
+txt2.place(x=30, y=173)
 
-lbl3= tk.Label(frame2, text="Email",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
-lbl3.place(x=40, y=225)
+lbl3= tk.Label(frame2, text="Email   ",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
+lbl3.place(x=-77, y=225)
 
 txt3 = tk.Entry(frame2,width=30 ,fg="black",font=('times', 15, ' bold ')  )
 txt3.place(x=30, y=258)
 
 lbl6= tk.Label(frame2, text="Password",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
-lbl6.place(x=40, y=310)
+lbl6.place(x=-67, y=310)
 
 txt6 = tk.Entry(frame2,width=30 ,show="*",fg="black",font=('times', 15, ' bold ')  )
 txt6.place(x=30, y=343)
+
+lbl7 = tk.Label(frame2, text="Last Name",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
+lbl7.place(x=310, y=140)
+
+txt7 = tk.Entry(frame2,width=30 ,fg="black",font=('times', 15, ' bold ')  )
+txt7.place(x=400, y=173)
+
+lbl8= tk.Label(frame2, text="Mobile Number   ",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
+lbl8.place(x=340, y=225) 
+
+txt8 = tk.Entry(frame2,width=30 ,fg="black",font=('times', 15, ' bold ')  )
+txt8.place(x=400, y=258)
+validateMobile = window.register(ValidatPhone)
+txt8.config(validate="key" ,validatecommand=(validateMobile,'%P'))
+
+lbl9= tk.Label(frame2, text="Confirm Password",width=20  ,fg="black"  ,bg=black ,font=('times', 17, ' bold '))
+lbl9.place(x=350, y=310)
+
+txt9 = tk.Entry(frame2,width=30 ,show="*",fg="black",font=('times', 15, ' bold ')  )
+txt9.place(x=400, y=343)
+
 
 message1 = tk.Label(frame2, text="1)Take Images  >>>  2)Save your Data" ,bg=black ,fg="black"  ,width=39 ,height=1, activebackground = blue ,font=('times', 15, ' bold '))
 # message1.place(x=7, y=230)
@@ -472,23 +592,11 @@ filemenu.add_command(label='Exit',command = window.destroy)
 menubar.add_cascade(label='Help',font=('times', 29, ' bold '),menu=filemenu)
 
 ###################### BUTTONS ##################################
-
-clearButton4 = tk.Button(frame1, text="Clear", command=clear4  ,fg="black"  ,bg=purple ,width=5 , activebackground = "white" ,font=('times', 11, ' bold '))
-clearButton4.place(x=315, y=172) 
-clearButton5 = tk.Button(frame1, text="Clear", command=clear5  ,fg="black"  ,bg=purple  ,width=5 , activebackground = "white" ,font=('times', 11, ' bold '))
-clearButton5.place(x=315, y=257) 
-clearButton = tk.Button(frame2, text="Clear", command=clear2  ,fg="black"  ,bg=purple  ,width=5 ,activebackground = "white" ,font=('times', 11, ' bold '))
-clearButton.place(x=315, y=86)
-clearButton2 = tk.Button(frame2, text="Clear", command=clear  ,fg="black"  ,bg=purple  ,width=5 , activebackground = "white" ,font=('times', 11, ' bold '))
-clearButton2.place(x=315, y=172) 
-clearButton3 = tk.Button(frame2, text="Clear", command=clear3  ,fg="black"  ,bg=purple  ,width=5 , activebackground = "white" ,font=('times', 11, ' bold '))
-clearButton3.place(x=315, y=257) 
-clearButton6 = tk.Button(frame2, text="Clear", command=clear6  ,fg="black"  ,bg=purple  ,width=5 , activebackground = "white" ,font=('times', 11, ' bold '))
-clearButton6.place(x=315, y=342)    
-takeImg = tk.Button(frame2, text="Capture Images", command=CaptureImages   ,bg="#040a5c"  ,width=12  ,height=1, activebackground = "white",fg="white" ,font=('times', 15, ' bold '))
+   
+takeImg = tk.Button(frame2, text="Capture Images", command=CaptureImages   ,bg="#040a5c"  ,width=24  ,height=2, activebackground = "white",fg="white" ,font=('times', 15, ' bold '))
 takeImg.place(x=30, y=410)
-signUp = tk.Button(frame2, text="Sign Up", command=psw  ,bg=blue  ,width=10  ,height=1, activebackground = "white" ,fg="white",font=('times', 15, ' bold '))
-signUp.place(x=230, y=410)
+signUp = tk.Button(frame2, text="Sign Up", command=SignUp  ,bg=blue  ,width=25  ,height=1, activebackground = "white" ,fg="white",font=('times', 15, ' bold '))
+signUp.place(x=400, y=410)
 trackImg = tk.Button(frame1, text="Face Recognition", command=TrackImages  ,fg="white"  ,bg=blue  ,width=25  ,height=1, activebackground = "white" ,font=('times', 15, ' bold '))
 trackImg.place(x=30,y=80)
 logIn = tk.Button(frame1, text="Log in", command=logIn  ,fg="white"  ,bg=blue  ,width=25 ,height=1, activebackground = "white" ,font=('times', 15, ' bold '))
